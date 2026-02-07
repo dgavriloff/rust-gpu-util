@@ -138,9 +138,8 @@ impl GpuMonitor {
             .clock_info(nvml_wrapper::enum_wrappers::device::Clock::SM)
             .unwrap_or(0);
 
-        // Collect all PIDs first, then resolve names in one batch
+        // Collect GPU processes from both compute and graphics lists
         let mut processes = Vec::new();
-        let mut all_pids = Vec::new();
 
         if let Ok(compute_procs) = device.running_compute_processes() {
             for proc in compute_procs {
@@ -148,10 +147,9 @@ impl GpuMonitor {
                     UsedGpuMemory::Used(bytes) => bytes,
                     UsedGpuMemory::Unavailable => 0,
                 };
-                all_pids.push(proc.pid);
                 processes.push(ProcessInfo {
                     pid: proc.pid,
-                    name: String::new(), // resolved below
+                    name: String::new(),
                     vram_mb: vram_bytes / (1024 * 1024),
                 });
             }
@@ -165,7 +163,6 @@ impl GpuMonitor {
                     UsedGpuMemory::Used(bytes) => bytes,
                     UsedGpuMemory::Unavailable => 0,
                 };
-                all_pids.push(proc.pid);
                 processes.push(ProcessInfo {
                     pid: proc.pid,
                     name: String::new(),
@@ -173,6 +170,9 @@ impl GpuMonitor {
                 });
             }
         }
+
+        // Drop processes with no meaningful VRAM usage
+        processes.retain(|p| p.vram_mb > 0);
 
         // Batch resolve process names
         resolve_process_names(&mut processes);

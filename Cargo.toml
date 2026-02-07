@@ -6,15 +6,16 @@ description = "A lightweight, native NVIDIA GPU monitor for ML workloads"
 license = "MIT"
 
 [dependencies]
-eframe = { version = "0.31", default-features = false, features = ["default_fonts", "glow", "persistence"] }
+eframe = { version = "0.31", default-features = false, features = ["default_fonts", "glow"] }
 egui = "0.31"
 nvml-wrapper = "0.10"
 sysinfo = "0.33"
 chrono = "0.4"
+tray-icon = "0.21"
 
 # Windows: hide console window
 [target.'cfg(windows)'.dependencies]
-winapi = { version = "0.3", features = ["wincon"] }
+winapi = { version = "0.3", features = ["wincon", "winuser", "wingdi", "windef"] }
 
 [profile.release]
 opt-level = "z"
