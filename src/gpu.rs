@@ -1,4 +1,5 @@
 use nvml_wrapper::enum_wrappers::device::TemperatureSensor;
+use nvml_wrapper::enums::device::UsedGpuMemory;
 use nvml_wrapper::error::NvmlError;
 use nvml_wrapper::Nvml;
 use std::collections::VecDeque;
@@ -144,8 +145,8 @@ impl GpuMonitor {
         if let Ok(compute_procs) = device.running_compute_processes() {
             for proc in compute_procs {
                 let vram_bytes = match proc.used_gpu_memory {
-                    Some(bytes) => bytes,
-                    None => 0,
+                    UsedGpuMemory::Used(bytes) => bytes,
+                    UsedGpuMemory::Unavailable => 0,
                 };
                 all_pids.push(proc.pid);
                 processes.push(ProcessInfo {
@@ -161,8 +162,8 @@ impl GpuMonitor {
                     continue;
                 }
                 let vram_bytes = match proc.used_gpu_memory {
-                    Some(bytes) => bytes,
-                    None => 0,
+                    UsedGpuMemory::Used(bytes) => bytes,
+                    UsedGpuMemory::Unavailable => 0,
                 };
                 all_pids.push(proc.pid);
                 processes.push(ProcessInfo {
