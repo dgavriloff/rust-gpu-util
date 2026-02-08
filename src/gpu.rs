@@ -171,9 +171,6 @@ impl GpuMonitor {
             }
         }
 
-        // Drop processes with no meaningful VRAM usage
-        processes.retain(|p| p.vram_mb > 0);
-
         // Batch resolve process names
         resolve_process_names(&mut processes);
 
